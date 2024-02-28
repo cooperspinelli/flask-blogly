@@ -39,6 +39,7 @@ def new_user_form():
 
 @app.post('/users/new')
 def create_new_user():
+    """Creates a new user record and redirects to the users list."""
 
     first = request.form['first']
     last = request.form['last']
@@ -52,3 +53,19 @@ def create_new_user():
     db.session.commit()
 
     return redirect('/users')
+
+@app.get('/users/<int:user_id>')
+def display_user_details(user_id):
+    """Displays user page."""
+    user = User.query.get_or_404(user_id)
+
+    return render_template('user_details.html', user=user)
+
+
+@app.get('/users/<int:user_id>/edit')
+def display_edit_page(user_id):
+    """Displays page that allows user to edit their information."""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template("edit.html", user=user)
