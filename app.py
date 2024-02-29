@@ -3,7 +3,7 @@
 import os
 
 from flask import Flask, render_template, redirect, request
-from models import connect_db, User, db
+from models import connect_db, User, Post, db
 # from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -43,13 +43,9 @@ def new_user_form():
 def create_new_user():
     """Creates a new user record and redirects to the users list."""
 
-    image_url = None if request.form['image_url'] == '' else request.form['image_url']
-
-    # request.form or None on line 52
-
     new_user = User(first_name=request.form['first'],
                     last_name=request.form['last'],
-                    image_url=image_url)
+                    image_url=request.form['image_url'] or None)
 
     db.session.add(new_user)
     db.session.commit()
@@ -80,7 +76,7 @@ def edit_user(user_id):
     redirects to users page"""
 
     # get or 404
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
 
     user.first_name = request.form['first']
     user.last_name = request.form['last']
@@ -97,10 +93,18 @@ def delete_user(user_id):
     """Deletes user based on id and redirects to users page"""
 
     # get or 404
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
 
     db.session.delete(user)
     db.session.commit()
     # flash a message
 
     return redirect('/users')
+
+@app.get('/users/<int:user_id>/posts/new')
+def display_new_post_form(user_id):
+    """Displays form for users to make a new post."""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template('new_post_form.html', user=user)
