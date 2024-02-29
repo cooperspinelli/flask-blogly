@@ -3,7 +3,7 @@
 import os
 
 from flask import Flask, render_template, redirect, request
-from models import connect_db, User, Post, db
+from models import connect_db, User, Post, Tag, db
 # from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -111,9 +111,9 @@ def display_new_post_form(user_id):
     user = User.query.get_or_404(user_id)
     return render_template('new_post_form.html', user=user)
 
-#TODO: more verby name
+
 @app.post('/users/<int:user_id>/posts/new')
-def new_post(user_id):
+def create_new_post(user_id):
     """Handles creation of new post and redirects"""
 
     new_post = Post(title=request.form['title'],
@@ -156,16 +156,23 @@ def edit_post(post_id):
 
     return redirect(f'/posts/{post_id}')
 
-#TODO: can remove line 165, instance remains even after delete
+
 @app.post('/posts/<int:post_id>/delete')
 def delete_post(post_id):
     """Deletes post based on id and redirects to users page"""
 
     post = Post.query.get_or_404(post_id)
-    owner_id = post.user.id
 
     db.session.delete(post)
     db.session.commit()
     # flash a message
 
-    return redirect(f'/users/{owner_id}')
+    return redirect(f'/users/{post.user.id}')
+
+
+@app.get('/tags')
+def display_tags():
+    """Displays list of tags"""
+
+    tags = Tag.query.all()
+    return render_template('tag_list.html', tags = tags)
