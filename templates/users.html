@@ -11,6 +11,8 @@
     <li><a href="/users/{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</a></li>
   {% endfor %}
 </ul>
+
+<!-- could just be a link -->
 <form action="/users/new" method="GET">
   <button>Add user</button>
 </form>

@@ -49,28 +49,43 @@ class UserViewTestCase(TestCase):
         # value of their id, since it will change each time our tests are run.
         self.user_id = test_user.id
 
+
     def tearDown(self):
         """Clean up any fouled transaction."""
 
         db.session.rollback()
 
+
     def test_list_users(self):
+        """Tests user list display"""
+
         with app.test_client() as c:
             resp = c.get("/users")
+
             self.assertEqual(resp.status_code, 200)
+
             html = resp.get_data(as_text=True)
+
             self.assertIn("test1_first", html)
             self.assertIn("test1_last", html)
 
+
     def test_user_details_display(self):
+        """Tests page for displaying user details"""
+
         with app.test_client() as c:
             resp = c.get(f'/users/{self.user_id}')
+
             self.assertEqual(resp.status_code, 200)
+
             html = resp.get_data(as_text=True)
             self.assertIn(f'<form action="/users/{self.user_id}/edit', html)
             self.assertIn(f'<form action="/users/{self.user_id}/delete', html)
 
+
     def test_new_user_post(self):
+        """Tests creation of new user"""
+
         with app.test_client() as c:
             resp = c.post(
                 '/users/new',
@@ -78,7 +93,38 @@ class UserViewTestCase(TestCase):
                       'last': 'Sapiro',
                       'image_url': ''}
                 )
-            user_david = User.query.filter_by(first_name = 'David').one()
+
             self.assertEqual(resp.status_code, 302)
+
+            user_david = User.query.filter_by(first_name = 'David').one()
             self.assertEqual(user_david.image_url, DEFAULT_IMAGE_URL)
 
+
+    def test_edit_form_display(self):
+        """Tests edit form display"""
+
+        with app.test_client() as c:
+            resp = c.get(f'/users/{self.user_id}/edit')
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn('<h1>Edit A User</h1>', html)
+            self.assertIn(f'<form action="/users/{self.user_id}" method="GET">', html)
+
+
+    def test_edit_user(self):
+        """Tests editing of a user"""
+
+        with app.test_client() as c:
+            resp = c.post(
+                f'/users/{self.user_id}/edit',
+                data={'first': 'New',
+                      'last': 'Name',
+                      'image_url': DEFAULT_IMAGE_URL}
+                )
+
+            self.assertEqual(resp.status_code, 302)
+
+            edited_user = User.query.filter_by(first_name = 'New').one()
+            self.assertEqual(edited_user.last_name, 'Name')

@@ -4,7 +4,7 @@ import os
 
 from flask import Flask, render_template, redirect, request
 from models import connect_db, User, db
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
@@ -27,6 +27,7 @@ def redirect_to_users():
 def list_users():
     """List users with an add button."""
 
+    # method chain an order by on that bad boi
     users = User.query.all()
     return render_template("users.html", users=users)
 
@@ -44,12 +45,15 @@ def create_new_user():
 
     image_url = None if request.form['image_url'] == '' else request.form['image_url']
 
+    # request.form or None on line 52
+
     new_user = User(first_name=request.form['first'],
                     last_name=request.form['last'],
                     image_url=image_url)
 
     db.session.add(new_user)
     db.session.commit()
+    # flash some positive feedback
 
     return redirect('/users')
 
@@ -75,11 +79,13 @@ def edit_user(user_id):
     """Edits users information based on form input and
     redirects to users page"""
 
+    # get or 404
     user = User.query.get(user_id)
 
     user.first_name = request.form['first']
     user.last_name = request.form['last']
     user.image_url = request.form['image_url']
+    # do some extra checking here TODO:
 
     db.session.commit()
 
@@ -90,9 +96,11 @@ def edit_user(user_id):
 def delete_user(user_id):
     """Deletes user based on id and redirects to users page"""
 
+    # get or 404
     user = User.query.get(user_id)
 
     db.session.delete(user)
     db.session.commit()
+    # flash a message
 
     return redirect('/users')
