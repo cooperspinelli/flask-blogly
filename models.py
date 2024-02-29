@@ -16,6 +16,8 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
+    posts = db.relationship('Post', cascade='all, delete', backref='user')
+
     id = db.Column(
         db.Integer,
         primary_key = True,
@@ -41,8 +43,6 @@ class User(db.Model):
 class Post(db.Model):
 
     __tablename__ = 'posts'
-
-    user = db.relationship('User', backref='posts')
 
     post_id = db.Column(
         db.Integer,

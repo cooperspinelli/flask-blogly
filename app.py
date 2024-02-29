@@ -77,13 +77,12 @@ def edit_user(user_id):
     """Edits users information based on form input and
     redirects to users page"""
 
-    # get or 404
     user = User.query.get_or_404(user_id)
 
     user.first_name = request.form['first']
     user.last_name = request.form['last']
     user.image_url = request.form['image_url']
-    # do some extra checking here TODO:
+    # do some extra checking here
 
     db.session.commit()
 
@@ -94,7 +93,6 @@ def edit_user(user_id):
 def delete_user(user_id):
     """Deletes user based on id and redirects to users page"""
 
-    # get or 404
     user = User.query.get_or_404(user_id)
 
     db.session.delete(user)
@@ -113,6 +111,7 @@ def display_new_post_form(user_id):
 
 @app.post('/users/<int:user_id>/posts/new')
 def new_post(user_id):
+    """Handles creation of new post and redirects"""
 
     new_post = Post(title = request.form['title'],
                     content = request.form['content'],
@@ -150,3 +149,16 @@ def edit_post(post_id):
     db.session.commit()
 
     return redirect(f'/posts/{post_id}')
+
+@app.post('/posts/<int:post_id>/delete')
+def delete_post(post_id):
+    """Deletes post based on id and redirects to users page"""
+
+    post = Post.query.get_or_404(post_id)
+    owner_id = post.user.id
+
+    db.session.delete(post)
+    db.session.commit()
+    # flash a message
+
+    return redirect(f'/users/{owner_id}')
