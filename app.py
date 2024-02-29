@@ -22,6 +22,7 @@ def redirect_to_users():
 
     return redirect('/users')
 
+
 @app.get('/users')
 def list_users():
     """List users with an add button."""
@@ -41,24 +42,23 @@ def new_user_form():
 def create_new_user():
     """Creates a new user record and redirects to the users list."""
 
-    first = request.form['first']
-    last = request.form['last']
-    url = request.form['image_url']
+    image_url = None if request.form['image_url'] == '' else request.form['image_url']
 
-    new_user = User(first_name = first,
-                    last_name = last,
-                    image_url = url)
+    new_user = User(first_name=request.form['first'],
+                    last_name=request.form['last'],
+                    image_url=image_url)
 
     db.session.add(new_user)
     db.session.commit()
 
     return redirect('/users')
 
+
 @app.get('/users/<int:user_id>')
 def display_user_details(user_id):
     """Displays user page."""
-    user = User.query.get_or_404(user_id)
 
+    user = User.query.get_or_404(user_id)
     return render_template('user_details.html', user=user)
 
 
@@ -67,5 +67,32 @@ def display_edit_page(user_id):
     """Displays page that allows user to edit their information."""
 
     user = User.query.get_or_404(user_id)
-
     return render_template("edit.html", user=user)
+
+
+@app.post('/users/<int:user_id>/edit')
+def edit_user(user_id):
+    """Edits users information based on form input and
+    redirects to users page"""
+
+    user = User.query.get(user_id)
+
+    user.first_name = request.form['first']
+    user.last_name = request.form['last']
+    user.image_url = request.form['image_url']
+
+    db.session.commit()
+
+    return redirect('/users')
+
+
+@app.post('/users/<int:user_id>/delete')
+def delete_user(user_id):
+    """Deletes user based on id and redirects to users page"""
+
+    user = User.query.get(user_id)
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return redirect('/users')
