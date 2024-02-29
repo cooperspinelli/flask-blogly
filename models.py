@@ -16,7 +16,7 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
-    posts = db.relationship('Post', cascade='all, delete', backref='user')
+    posts = db.relationship('Post', backref='user')
 
     id = db.Column(
         db.Integer,

@@ -1,11 +1,10 @@
+from models import DEFAULT_IMAGE_URL, User, Post
+from app import app, db
+from unittest import TestCase
 import os
 
 os.environ["DATABASE_URL"] = "postgresql:///blogly_test"
 
-from unittest import TestCase
-
-from app import app, db
-from models import DEFAULT_IMAGE_URL, User, Post
 
 # Make Flask errors be real errors, rather than HTML pages with error info
 app.config['TESTING'] = True
@@ -32,7 +31,7 @@ class UserViewTestCase(TestCase):
         # As you add more models later in the exercise, you'll want to delete
         # all of their records before each test just as we're doing with the
         # User model below.
-        # Post.query.delete()
+        Post.query.delete()
         User.query.delete()
 
         test_user = User(
@@ -50,12 +49,10 @@ class UserViewTestCase(TestCase):
         # value of their id, since it will change each time our tests are run.
         self.user_id = test_user.id
 
-
     def tearDown(self):
         """Clean up any fouled transaction."""
 
         db.session.rollback()
-
 
     def test_list_users(self):
         """Tests user list display"""
@@ -70,7 +67,6 @@ class UserViewTestCase(TestCase):
             self.assertIn("test1_first", html)
             self.assertIn("test1_last", html)
 
-
     def test_user_details_display(self):
         """Tests page for displaying user details"""
 
@@ -83,7 +79,6 @@ class UserViewTestCase(TestCase):
             self.assertIn(f'<form action="/users/{self.user_id}/edit', html)
             self.assertIn(f'<form action="/users/{self.user_id}/delete', html)
 
-
     def test_new_user(self):
         """Tests creation of new user"""
 
@@ -93,13 +88,12 @@ class UserViewTestCase(TestCase):
                 data={'first': 'David',
                       'last': 'Sapiro',
                       'image_url': ''}
-                )
+            )
 
             self.assertEqual(resp.status_code, 302)
 
-            user_david = User.query.filter_by(first_name = 'David').one()
+            user_david = User.query.filter_by(first_name='David').one()
             self.assertEqual(user_david.image_url, DEFAULT_IMAGE_URL)
-
 
     def test_edit_form_display(self):
         """Tests edit form display"""
@@ -111,8 +105,8 @@ class UserViewTestCase(TestCase):
 
             html = resp.get_data(as_text=True)
             self.assertIn('<h1>Edit A User</h1>', html)
-            self.assertIn(f'<form action="/users/{self.user_id}" method="GET">', html)
-
+            self.assertIn(
+                f'<form action="/users/{self.user_id}" method="GET">', html)
 
     def test_edit_user(self):
         """Tests editing of a user"""
@@ -123,11 +117,11 @@ class UserViewTestCase(TestCase):
                 data={'first': 'New',
                       'last': 'Name',
                       'image_url': DEFAULT_IMAGE_URL}
-                )
+            )
 
             self.assertEqual(resp.status_code, 302)
 
-            edited_user = User.query.filter_by(first_name = 'New').one()
+            edited_user = User.query.filter_by(first_name='New').one()
             self.assertEqual(edited_user.last_name, 'Name')
 
     def test_new_post(self):
@@ -138,11 +132,29 @@ class UserViewTestCase(TestCase):
                 f'/users/{self.user_id}/posts/new',
                 data={'title': 'Test Post',
                       'content': 'This post is a test post'},
-                follow_redirects = True)
+                follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+# stay out of database, test different html
+            post_id = Post.query.filter_by(title='Test Post').one().post_id
+            html = resp.get_data(as_text=True)
+            self.assertIn(
+                f'<li><a href="/posts/{post_id}"> Test Post </a></li>', html)
+# in addition to assertNotIn, test something else, flash message, etc or there->not there
+    def test_delete_user_with_posts(self):
+        """Tests deleting a user with posts."""
+
+        with app.test_client() as c:
+            c.post(
+                f'/users/{self.user_id}/posts/new',
+                data={'title': 'Test Post',
+                      'content': 'This post is a test post'})
+
+            resp = c.post(
+                f'/users/{self.user_id}/delete',
+                follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
 
-            post_id = Post.query.filter_by(title='Test Post').one().post_id
             html = resp.get_data(as_text=True)
-            self.assertIn(f'<li><a href="/posts/{post_id}"> Test Post </a></li>', html)
-
+            self.assertNotIn("test1_first", html)
