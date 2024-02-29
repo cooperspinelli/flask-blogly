@@ -130,3 +130,23 @@ def show_post(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post_details.html', post=post)
 
+@app.get('/posts/<int:post_id>/edit')
+def display_edit_post_form(post_id):
+    """Displays form that allows users to edit a post."""
+
+    post = Post.query.get_or_404(post_id)
+
+    return render_template('edit_post.html', post=post)
+
+@app.post('/posts/<int:post_id>/edit')
+def edit_post(post_id):
+    """Edits post data and redirects back to the post."""
+
+    post = Post.query.get_or_404(post_id)
+
+    post.title = request.form['title']
+    post.content = request.form['content']
+
+    db.session.commit()
+
+    return redirect(f'/posts/{post_id}')

@@ -11,8 +11,8 @@
 <p><i>By {{post.user.first_name}} {{ post.user.last_name }}</i></p>
 
 <form>
-  <button type="submit" formaction="/posts/{{ post.post_id }}/delete" formmethod="POST">test Delete</button>
-  <button type="submit" formaction="/posts/{{ post.post_id }}/edit" formmethod="POST">test Edit</button>
+  <button type="submit" formaction="/posts/{{ post.post_id }}/delete" formmethod="POST">Delete</button>
+  <button type="submit" formaction="/posts/{{ post.post_id }}/edit" formmethod="GET">Edit</button>
 </form>
 
 <a href="/users/{{ post.user.id }}">Back</a>
