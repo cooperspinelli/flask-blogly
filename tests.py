@@ -61,3 +61,24 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn("test1_first", html)
             self.assertIn("test1_last", html)
+
+    def test_user_details_display(self):
+        with app.test_client() as c:
+            resp = c.get(f'/users/{self.user_id}')
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn(f'<form action="/users/{self.user_id}/edit', html)
+            self.assertIn(f'<form action="/users/{self.user_id}/delete', html)
+
+    def test_new_user_post(self):
+        with app.test_client() as c:
+            resp = c.post(
+                '/users/new',
+                data={'first': 'David',
+                      'last': 'Sapiro',
+                      'image_url': ''}
+                )
+            user_david = User.query.filter_by(first_name = 'David').one()
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(user_david.image_url, DEFAULT_IMAGE_URL)
+
