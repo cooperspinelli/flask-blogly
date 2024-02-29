@@ -59,7 +59,9 @@ def display_user_details(user_id):
     """Displays user page."""
 
     user = User.query.get_or_404(user_id)
-    return render_template('user_details.html', user=user)
+    posts = user.posts
+
+    return render_template('user_details.html', user=user, posts=posts)
 
 
 @app.get('/users/<int:user_id>/edit')
@@ -106,5 +108,25 @@ def display_new_post_form(user_id):
     """Displays form for users to make a new post."""
 
     user = User.query.get_or_404(user_id)
-
     return render_template('new_post_form.html', user=user)
+
+
+@app.post('/users/<int:user_id>/posts/new')
+def new_post(user_id):
+
+    new_post = Post(title = request.form['title'],
+                    content = request.form['content'],
+                    user_id = user_id)
+
+    db.session.add(new_post)
+    db.session.commit()
+
+    return redirect(f'/users/{user_id}')
+
+@app.get('/posts/<int:post_id>')
+def show_post(post_id):
+    """Displays post details"""
+
+    post = Post.query.get_or_404(post_id)
+    return render_template('post_details.html', post=post)
+

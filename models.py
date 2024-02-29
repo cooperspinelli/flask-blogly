@@ -44,7 +44,7 @@ class Post(db.Model):
 
     user = db.relationship('User', backref='posts')
 
-    id = db.Column(
+    post_id = db.Column(
         db.Integer,
         primary_key = True
     )

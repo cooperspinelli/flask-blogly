@@ -7,10 +7,10 @@
 <h1>Add Post for {{ user.first_name}} {{ user.last_name }}</h1>
 
 
-<form>
+<form action="/users/{{ user.id }}/posts/new" method="POST">
   <p>Title:     <input name="title" required></p>
   <p>Content:  <input name="content" required></p>
-  <button formaction="/users/{{ user.id }}/posts/new" method="POST">Add</button>
+  <button>Add</button>
 </form>
 
 <a href="/users/{{ user.id }}">Cancel</a>
