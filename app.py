@@ -109,7 +109,8 @@ def display_new_post_form(user_id):
     """Displays form for users to make a new post."""
 
     user = User.query.get_or_404(user_id)
-    return render_template('new_post_form.html', user=user)
+    tags = Tag.query.all()
+    return render_template('new_post_form.html', user=user, tags=tags)
 
 
 @app.post('/users/<int:user_id>/posts/new')
@@ -119,6 +120,12 @@ def create_new_post(user_id):
     new_post = Post(title=request.form['title'],
                     content=request.form['content'],
                     user_id=user_id)
+
+    tags = request.form.getlist('tags')
+
+    for tag_id in tags:
+        tag_instance = Tag.query.get(tag_id)
+        new_post.tags.append(tag_instance)
 
     db.session.add(new_post)
     db.session.commit()
@@ -131,7 +138,9 @@ def show_post(post_id):
     """Displays post details"""
 
     post = Post.query.get_or_404(post_id)
-    return render_template('post_details.html', post=post)
+    tags = post.tags
+
+    return render_template('post_details.html', post=post, tags=tags)
 
 
 @app.get('/posts/<int:post_id>/edit')
@@ -175,7 +184,8 @@ def display_tags():
     """Displays list of tags"""
 
     tags = Tag.query.all()
-    return render_template('tag_list.html', tags = tags)
+    return render_template('tag_list.html', tags=tags)
+
 
 @app.get('/tags/new')
 def display_new_tag_form():
@@ -183,14 +193,27 @@ def display_new_tag_form():
 
     return render_template('new_tag_form.html')
 
+
 @app.post('/tags/new')
 def create_new_tag():
     """Accepts new tag form input and creates a new tag."""
 
     new_tag = Tag(
-        name = request.form['name']
+        name=request.form['name']
     )
     db.session.add(new_tag)
     db.session.commit()
 
     return redirect('/tags')
+
+
+@app.get('/tags/<int:tag_id>')
+def display_tag_details(tag_id):
+    """Displays tag details"""
+
+    tag = Tag.query.get_or_404(tag_id)
+    posts = tag.posts
+
+    return render_template("tag_details.html",
+                           tag=tag,
+                           posts=posts)

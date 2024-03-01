@@ -6,10 +6,17 @@
 
 <h1>Add Post for {{ user.first_name}} {{ user.last_name }}</h1>
 
-
 <form action="/users/{{ user.id }}/posts/new" method="POST">
   <p>Title:     <input name="title" required></p>
   <p>Content:  <input name="content" required></p>
+
+  {% for tag in tags %}
+
+  <label for="tag_{{ tag.tag_id }}">{{ tag.name }}</label>
+  <input id="tag_{{ tag.tag_id }}" name="tags" value="{{ tag.tag_id }}" type="checkbox">
+
+  {% endfor %}
+
   <button>Add</button>
 </form>
 
