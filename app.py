@@ -4,6 +4,8 @@ import os
 
 from flask import Flask, render_template, redirect, request
 from models import connect_db, User, Post, Tag, db
+from utils import delete_post_from_db, delete_tag_from_db
+
 # from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -96,7 +98,8 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
     for post in user.posts:
-        db.session.delete(post)
+        delete_post_from_db(post.post_id)
+
     db.session.delete(user)
     db.session.commit()
     # flash a message
@@ -172,12 +175,12 @@ def delete_post(post_id):
     """Deletes post based on id and redirects to users page"""
 
     post = Post.query.get_or_404(post_id)
+    owner_id = post.user.id
 
-    db.session.delete(post)
-    db.session.commit()
+    delete_post_from_db(post.post_id)
     # flash a message
 
-    return redirect(f'/users/{post.user.id}')
+    return redirect(f'/users/{owner_id}')
 
 
 @app.get('/tags')
@@ -199,9 +202,8 @@ def display_new_tag_form():
 def create_new_tag():
     """Accepts new tag form input and creates a new tag."""
 
-    new_tag = Tag(
-        name=request.form['name']
-    )
+    new_tag = Tag(name=request.form['name'])
+
     db.session.add(new_tag)
     db.session.commit()
 
@@ -230,6 +232,7 @@ def show_tag_edit_form(tag_id):
 
 @app.post('/tags/<int:tag_id>/edit')
 def edit_tag(tag_id):
+    """Handles editing tag"""
 
     tag = Tag.query.get_or_404(tag_id)
     tag.name = request.form['name']
@@ -239,10 +242,11 @@ def edit_tag(tag_id):
     return redirect(f'/tags/{tag_id}')
 
 
-"""
-when delete post, remove tag associations
-when delete tag, remove post associations
-post tags/tag_id/delete
+@app.post('/tags/<int:tag_id>/delete')
+def delete_tag(tag_id):
+    """Handles deleting tag"""
 
+    tag = Tag.query.get_or_404(tag_id)
+    delete_tag_from_db(tag.tag_id)
 
-"""
+    return redirect('/tags')
