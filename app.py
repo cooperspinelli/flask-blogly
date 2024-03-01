@@ -121,11 +121,8 @@ def create_new_post(user_id):
                     content=request.form['content'],
                     user_id=user_id)
 
-    tags = request.form.getlist('tags')
-
-    for tag_id in tags:
-        tag_instance = Tag.query.get(tag_id)
-        new_post.tags.append(tag_instance)
+    new_post.tags = [Tag.query.get(tag_id)
+                     for tag_id in request.form.getlist('tags')]
 
     db.session.add(new_post)
     db.session.commit()
@@ -148,8 +145,9 @@ def display_edit_post_form(post_id):
     """Displays form that allows users to edit a post."""
 
     post = Post.query.get_or_404(post_id)
+    tags = Tag.query.all()
 
-    return render_template('edit_post.html', post=post)
+    return render_template('edit_post.html', post=post, tags=tags)
 
 
 @app.post('/posts/<int:post_id>/edit')
@@ -160,6 +158,9 @@ def edit_post(post_id):
 
     post.title = request.form['title']
     post.content = request.form['content']
+
+    post.tags = [Tag.query.get(tag_id)
+                 for tag_id in request.form.getlist('tags')]
 
     db.session.commit()
 
@@ -217,3 +218,31 @@ def display_tag_details(tag_id):
     return render_template("tag_details.html",
                            tag=tag,
                            posts=posts)
+
+
+@app.get('/tags/<int:tag_id>/edit')
+def show_tag_edit_form(tag_id):
+    """Show form that allows user to edit tag."""
+
+    tag = Tag.query.get_or_404(tag_id)
+    return render_template("edit_tag.html", tag=tag)
+
+
+@app.post('/tags/<int:tag_id>/edit')
+def edit_tag(tag_id):
+
+    tag = Tag.query.get_or_404(tag_id)
+    tag.name = request.form['name']
+
+    db.session.commit()
+
+    return redirect(f'/tags/{tag_id}')
+
+
+"""
+when delete post, remove tag associations
+when delete tag, remove post associations
+post tags/tag_id/delete
+
+
+"""

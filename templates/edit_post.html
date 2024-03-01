@@ -11,6 +11,19 @@
   <p>Title:     <input name="title" required value="{{ post.title }}"></p>
   <p>Content:  <input name="content" required value="{{ post.content }}"></p>
   <button formaction="/posts/{{ post.post_id }}/edit" formmethod="POST">Save</button>
+
+  {% for tag in tags %}
+
+  <label for="tag_{{ tag.tag_id }}">{{ tag.name }}</label>
+  <input
+    id="tag_{{ tag.tag_id }}"
+    name="tags"
+    value="{{ tag.tag_id }}"
+    type="checkbox"
+    {% if tag in post.tags %} checked {% endif %} >
+
+  {% endfor %}
+
 </form>
 
 <a href="/posts/{{ post.post_id }}">Cancel</a>
