@@ -187,6 +187,7 @@ def delete_post(post_id):
 def display_tags():
     """Displays list of tags"""
 
+    # order by something
     tags = Tag.query.all()
     return render_template('tag_list.html', tags=tags)
 

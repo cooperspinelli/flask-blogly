@@ -9,6 +9,7 @@ def delete_post_from_db(post_id):
     db.session.commit()
 
 def delete_tag_from_db(tag_id):
+    #add a docstring :(
 
     tag = Tag.query.get(tag_id)
     tag.posts = []

@@ -83,6 +83,7 @@ class Tag(db.Model):
 
     __tablename__ = 'tags'
 
+    # change this to just id
     tag_id = db.Column(
         db.Integer,
         primary_key=True
@@ -99,6 +100,7 @@ class PostTag(db.Model):
 
     __tablename__ = 'post_tags'
 
+    # potentially not necessary
     __table_args__ = (PrimaryKeyConstraint('post_id', 'tag_id'),)
 
     post_id = db.Column(
